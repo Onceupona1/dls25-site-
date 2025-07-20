@@ -1,40 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>DLS25 Live Table</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DLS25 League Table</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      padding: 2rem;
+      text-align: center;
     }
     h1 {
-      text-align: center;
-      color: #2d3436;
+      color: #222;
     }
     table {
-      width: 100%;
+      margin: 0 auto;
       border-collapse: collapse;
-      margin-top: 20px;
+      width: 95%;
+      max-width: 800px;
       background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
+      padding: 12px 10px;
+      border: 1px solid #ddd;
     }
     th {
-      background-color: #2c3e50;
+      background-color: #0077cc;
       color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
     }
   </style>
 </head>
 <body>
   <h1>DLS25 League Table</h1>
-  <table id="leagueTable">
+  <p>Live standings based on Google Sheet updates</p>
+  <table id="league-table">
     <thead>
       <tr>
-        <th>Pos</th>
         <th>Team</th>
         <th>MP</th>
         <th>W</th>
@@ -50,70 +59,82 @@
   </table>
 
   <script>
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/108YwmKPdOX3ZkJpeILsnhYlv89A1oGkPWLqaDjyPTuE/gviz/tq?tqx=out:csv&sheet=Sheet1';
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/108YwmKPdOX3ZkJpeILsnhYlv89A1oGkPWLqaDjyPTuE/gviz/tq?tqx=out:csv&sheet=Sheet1";
 
-    fetch(csvUrl)
-      .then(response => response.text())
-      .then(data => {
-        const rows = data.trim().split('\n').slice(1);
-        const table = {};
+    async function fetchCSVData(url) {
+      const res = await fetch(url);
+      const data = await res.text();
+      return Papa.parse(data, { header: true }).data;
+    }
 
-        rows.forEach(row => {
-          const [home, hGoals, away, aGoals] = row.split(',');
+    function updateTable(results) {
+      const table = {};
 
-          const hg = parseInt(hGoals);
-          const ag = parseInt(aGoals);
+      results.forEach(row => {
+        const home = row['Home Team'].trim();
+        const away = row['Away Team'].trim();
+        const hg = parseInt(row['Home Goals']);
+        const ag = parseInt(row['Away Goals']);
+        if (isNaN(hg) || isNaN(ag)) return;
 
-          const updateTeam = (team, gf, ga, win, draw, loss) => {
-            if (!table[team]) table[team] = { team, mp: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
-            table[team].mp += 1;
-            table[team].gf += gf;
-            table[team].ga += ga;
-            table[team].w += win;
-            table[team].d += draw;
-            table[team].l += loss;
-            table[team].pts += win * 3 + draw;
-          };
-
-          if (hg > ag) {
-            updateTeam(home, hg, ag, 1, 0, 0);
-            updateTeam(away, ag, hg, 0, 0, 1);
-          } else if (hg < ag) {
-            updateTeam(home, hg, ag, 0, 0, 1);
-            updateTeam(away, ag, hg, 1, 0, 0);
-          } else {
-            updateTeam(home, hg, ag, 0, 1, 0);
-            updateTeam(away, ag, hg, 0, 1, 0);
+        [home, away].forEach(team => {
+          if (!table[team]) {
+            table[team] = { MP: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, Pts: 0 };
           }
         });
 
-        const sortedTeams = Object.values(table).sort((a, b) => {
-          if (b.pts !== a.pts) return b.pts - a.pts;
-          const gdA = a.gf - a.ga;
-          const gdB = b.gf - b.ga;
-          if (gdB !== gdA) return gdB - gdA;
-          return b.gf - a.gf;
-        });
+        table[home].MP++; table[away].MP++;
+        table[home].GF += hg; table[home].GA += ag;
+        table[away].GF += ag; table[away].GA += hg;
 
-        const tbody = document.querySelector('#leagueTable tbody');
-        sortedTeams.forEach((team, i) => {
-          const row = document.createElement('tr');
-          const gd = team.gf - team.ga;
-          row.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${team.team}</td>
-            <td>${team.mp}</td>
-            <td>${team.w}</td>
-            <td>${team.d}</td>
-            <td>${team.l}</td>
-            <td>${team.gf}</td>
-            <td>${team.ga}</td>
-            <td>${gd}</td>
-            <td>${team.pts}</td>
-          `;
-          tbody.appendChild(row);
-        });
+        if (hg > ag) {
+          table[home].W++; table[away].L++;
+          table[home].Pts += 3;
+        } else if (hg < ag) {
+          table[away].W++; table[home].L++;
+          table[away].Pts += 3;
+        } else {
+          table[home].D++; table[away].D++;
+          table[home].Pts += 1; table[away].Pts += 1;
+        }
       });
+
+      Object.values(table).forEach(team => {
+        team.GD = team.GF - team.GA;
+      });
+
+      const sorted = Object.entries(table).sort((a, b) => {
+        if (b[1].Pts !== a[1].Pts) return b[1].Pts - a[1].Pts;
+        if (b[1].GD !== a[1].GD) return b[1].GD - a[1].GD;
+        return b[1].GF - a[1].GF;
+      });
+
+      const tbody = document.querySelector("#league-table tbody");
+      tbody.innerHTML = "";
+
+      sorted.forEach(([team, stats]) => {
+        const row = `<tr>
+          <td>${team}</td>
+          <td>${stats.MP}</td>
+          <td>${stats.W}</td>
+          <td>${stats.D}</td>
+          <td>${stats.L}</td>
+          <td>${stats.GF}</td>
+          <td>${stats.GA}</td>
+          <td>${stats.GD}</td>
+          <td>${stats.Pts}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // Load PapaParse (for CSV)
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js";
+    script.onload = () => {
+      fetchCSVData(CSV_URL).then(updateTable);
+    };
+    document.head.appendChild(script);
   </script>
 </body>
 </html>
