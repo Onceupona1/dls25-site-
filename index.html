@@ -3,138 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DLS25 League Table</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f8;
-      padding: 2rem;
-      text-align: center;
-    }
-    h1 {
-      color: #222;
-    }
-    table {
-      margin: 0 auto;
-      border-collapse: collapse;
-      width: 95%;
-      max-width: 800px;
-      background: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 12px 10px;
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #0077cc;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-  </style>
+  <title>DLS25 Tournament Registration</title>
 </head>
 <body>
-  <h1>DLS25 League Table</h1>
-  <p>Live standings based on Google Sheet updates</p>
-  <table id="league-table">
-    <thead>
-      <tr>
-        <th>Team</th>
-        <th>MP</th>
-        <th>W</th>
-        <th>D</th>
-        <th>L</th>
-        <th>GF</th>
-        <th>GA</th>
-        <th>GD</th>
-        <th>Pts</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h2>DLS25 Tournament Registration</h2>
 
+  <form id="registration-form">
+    <label>Full Name:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Team Name:</label><br>
+    <input type="text" name="team" required><br><br>
+
+    <label>Email Address:</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <button type="submit">Pay & Register (GHS 50)</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/108YwmKPdOX3ZkJpeILsnhYlv89A1oGkPWLqaDjyPTuE/gviz/tq?tqx=out:csv&sheet=Sheet1";
+    const form = document.getElementById('registration-form');
+    const status = document.getElementById('status');
 
-    async function fetchCSVData(url) {
-      const res = await fetch(url);
-      const data = await res.text();
-      return Papa.parse(data, { header: true }).data;
-    }
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = form.name.value;
+      const team = form.team.value;
+      const email = form.email.value;
 
-    function updateTable(results) {
-      const table = {};
+      const handler = PaystackPop.setup({
+        key: 'pk_live_0b6dbae0544edafc7537a0e152426e9f6e804f5b',
+        email: email,
+        amount: 5000 * 100, // 50 GHS
+        currency: "GHS",
+        callback: function(response) {
+          // After successful payment
+          fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, team, email, reference: response.reference })
+          });
 
-      results.forEach(row => {
-        const home = row['Home Team'].trim();
-        const away = row['Away Team'].trim();
-        const hg = parseInt(row['Home Goals']);
-        const ag = parseInt(row['Away Goals']);
-        if (isNaN(hg) || isNaN(ag)) return;
-
-        [home, away].forEach(team => {
-          if (!table[team]) {
-            table[team] = { MP: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, Pts: 0 };
-          }
-        });
-
-        table[home].MP++; table[away].MP++;
-        table[home].GF += hg; table[home].GA += ag;
-        table[away].GF += ag; table[away].GA += hg;
-
-        if (hg > ag) {
-          table[home].W++; table[away].L++;
-          table[home].Pts += 3;
-        } else if (hg < ag) {
-          table[away].W++; table[home].L++;
-          table[away].Pts += 3;
-        } else {
-          table[home].D++; table[away].D++;
-          table[home].Pts += 1; table[away].Pts += 1;
+          form.reset();
+          status.innerText = "✅ Registration complete! See you in the tournament.";
+        },
+        onClose: function() {
+          status.innerText = "❌ Payment cancelled.";
         }
       });
-
-      Object.values(table).forEach(team => {
-        team.GD = team.GF - team.GA;
-      });
-
-      const sorted = Object.entries(table).sort((a, b) => {
-        if (b[1].Pts !== a[1].Pts) return b[1].Pts - a[1].Pts;
-        if (b[1].GD !== a[1].GD) return b[1].GD - a[1].GD;
-        return b[1].GF - a[1].GF;
-      });
-
-      const tbody = document.querySelector("#league-table tbody");
-      tbody.innerHTML = "";
-
-      sorted.forEach(([team, stats]) => {
-        const row = `<tr>
-          <td>${team}</td>
-          <td>${stats.MP}</td>
-          <td>${stats.W}</td>
-          <td>${stats.D}</td>
-          <td>${stats.L}</td>
-          <td>${stats.GF}</td>
-          <td>${stats.GA}</td>
-          <td>${stats.GD}</td>
-          <td>${stats.Pts}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-      });
-    }
-
-    // Load PapaParse (for CSV)
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js";
-    script.onload = () => {
-      fetchCSVData(CSV_URL).then(updateTable);
-    };
-    document.head.appendChild(script);
+      handler.openIframe();
+    });
   </script>
 </body>
 </html>
