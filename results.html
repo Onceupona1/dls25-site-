@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DLS25 Match Results</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #fdda4d;
+    }
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #1a1a1a;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #fdda4d;
+    }
+    th {
+      background-color: #222;
+    }
+    input[type="text"], input[type="number"] {
+      width: 80%;
+      padding: 6px;
+      background: #333;
+      color: white;
+      border: 1px solid #fdda4d;
+    }
+    .submit-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #fdda4d;
+      color: black;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .submit-btn:hover {
+      background-color: #ffce00;
+    }
+    a {
+      color: #fdda4d;
+      display: block;
+      margin-top: 30px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 Enter Match Results</h1>
+
+  <form>
+    <table>
+      <tr>
+        <th>Home Team</th>
+        <th>Score</th>
+        <th>Away Team</th>
+        <th>Score</th>
+      </tr>
+      <tr>
+        <td><input type="text" placeholder="Team Alpha"></td>
+        <td><input type="number" min="0" placeholder="0"></td>
+        <td><input type="text" placeholder="Team Bravo"></td>
+        <td><input type="number" min="0" placeholder="0"></td>
+      </tr>
+      <tr>
+        <td><input type="text" placeholder="Team Charlie"></td>
+        <td><input type="number" min="0" placeholder="0"></td>
+        <td><input type="text" placeholder="Team Delta"></td>
+        <td><input type="number" min="0" placeholder="0"></td>
+      </tr>
+      <!-- Add more rows if needed -->
+    </table>
+    <button class="submit-btn" type="button">Submit Results</button>
+  </form>
+
+  <a href="index.html">← Back to Home</a>
+</body>
+</html>
