@@ -22,7 +22,7 @@ regForm.addEventListener('submit', function(e) {
   let handler = PaystackPop.setup({
     key: paystackKey,
     email: `${data.phone}@demo.com`, // for demo, fake email
-    amount: 2000 * 100, // amount in kobo (₦2000)
+    amount: 50 * 100, // Amount in pesewas (GHS 50.00)
     currency: "GHS",
     ref: "REG-" + Date.now(),
     callback: function(response) {
