@@ -52,10 +52,13 @@ function renderFixtures(fixtures) {
   });
   html += `</table>`;
  document.getElementById('fixtures').innerHTML = html;
-  document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
-document.getElementById('standings').innerHTML = "Loading league table...";
 }
+document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
+document.getElementById('standings').innerHTML = "Loading league table...";
 
+fetch(SHEET_API)
+  .then(res => res.json())
+  ...
 // Fetch and process data
 fetch(SHEET_API)
   .then(res => res.json())
