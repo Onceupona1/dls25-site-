@@ -1,65 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>DLS25 Swiss Standings</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #fdda4d;
-    }
-    table {
-      width: 95%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #fdda4d;
-    }
-    th {
-      background: #222;
-    }
-    tr:nth-child(even) {
-      background: #1a1a1a;
-    }
-    a {
-      display: block;
-      margin-top: 20px;
-      color: #fdda4d;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <h1>🏆 DLS25 Swiss League Standings</h1>
+// Replace with your SheetDB endpoint or similar (see below for setup)
+const SHEETDB_API = "https://sheetdb.io/api/v1/YOUR_SHEETDB_ID";
+// For demo: go to https://sheetdb.io and connect a Google Sheet
 
-  <table>
-    <tr>
-      <th>Pos</th>
-      <th>Team</th>
-      <th>P</th>
-      <th>W</th>
-      <th>D</th>
-      <th>L</th>
-      <th>GF</th>
-      <th>GA</th>
-      <th>GD</th>
-      <th>Pts</th>
-    </tr>
-    <tr><td>1</td><td>Team Alpha</td><td>6</td><td>5</td><td>1</td><td>0</td><td>18</td><td>6</td><td>+12</td><td>16</td></tr>
-    <tr><td>2</td><td>Team Bravo</td><td>6</td><td>4</td><td>1</td><td>1</td><td>15</td><td>8</td><td>+7</td><td>13</td></tr>
-    <tr><td>3</td><td>Team Delta</td><td>6</td><td>4</td><td>0</td><td>2</td><td>13</td><td>9</td><td>+4</td><td>12</td></tr>
-    <!-- Add more rows -->
-  </table>
+const paystackKey = "pk_live_0b6dbae0544edafc7537a0e152426e9f6e804f5b"; // public key
 
-  <a href="index.html">← Back to Home</a>
-</body>
-</html>
+const regForm = document.getElementById('regForm');
+const msgDiv = document.getElementById('msg');
+
+regForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  msgDiv.textContent = "Processing payment...";
+
+  const formData = new FormData(regForm);
+  const data = {
+    name: formData.get('name'),
+    phone: formData.get('phone'),
+    team: formData.get('team')
+  };
+
+  // Start Paystack payment
+  let handler = PaystackPop.setup({
+    key: paystackKey,
+    email: `${data.phone}@demo.com`, // for demo, fake email
+    amount: 2000 * 100, // amount in kobo (₦2000)
+    currency: "NGN",
+    ref: "REG-" + Date.now(),
+    callback: function(response) {
+      // Payment successful, save to SheetDB
+      msgDiv.textContent = "Payment successful, saving registration...";
+      fetch(SHEETDB_API, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ data: data })
+      })
+      .then(res => res.json())
+      .then(() => {
+        // Store registration in localStorage for demo/confirmation
+        localStorage.setItem("registeredTeam", JSON.stringify(data));
+        window.location.href = "success.html";
+      })
+      .catch(() => {
+        msgDiv.textContent = "Error saving registration. Please contact support.";
+      });
+    },
+    onClose: function() {
+      msgDiv.textContent = "Payment window closed.";
+    }
+  });
+  handler.openIframe();
+});
