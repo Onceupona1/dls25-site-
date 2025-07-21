@@ -1,8 +1,5 @@
-// Replace with your SheetDB endpoint or similar (see below for setup)
 const SHEETDB_API = "https://sheetdb.io/api/v1/rhgvdm9riye3p";
-// For demo: go to https://sheetdb.io and connect a Google Sheet
-
-const paystackKey = "pk_live_0b6dbae0544edafc7537a0e152426e9f6e804f5b"; // public key
+const paystackKey = "pk_live_0b6dbae0544edafc7537a0e152426e9f6e804f5b";
 
 const regForm = document.getElementById('regForm');
 const msgDiv = document.getElementById('msg');
@@ -21,7 +18,7 @@ regForm.addEventListener('submit', function(e) {
   // Start Paystack payment
   let handler = PaystackPop.setup({
     key: paystackKey,
-    email: `${data.phone}@demo.com`, // for demo, fake email
+    email: `${data.phone}@demo.com`, // fake email
     amount: 50 * 100, // Amount in pesewas (GHS 50.00)
     currency: "GHS",
     ref: "REG-" + Date.now(),
@@ -35,8 +32,9 @@ regForm.addEventListener('submit', function(e) {
       })
       .then(res => res.json())
       .then(() => {
-        // Store registration in localStorage for demo/confirmation
+        // Save data to localStorage for confirmation & highlighting
         localStorage.setItem("registeredTeam", JSON.stringify(data));
+        localStorage.setItem("myTeam", data.team); // ✅ save team for highlighting
         window.location.href = "success.html";
       })
       .catch(() => {
