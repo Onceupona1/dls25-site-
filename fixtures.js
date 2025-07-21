@@ -1,9 +1,13 @@
 const SHEET_API = "https://sheetdb.io/api/v1/ev3zbcl5xanwt"; // Your SheetDB API
 
+// Show loading messages BEFORE fetching
+document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
+document.getElementById('standings').innerHTML = "Loading league table...";
+
 // Helper: Update standings for a team
 function updateTeam(stats, team, scored, conceded, result) {
   if (!stats[team]) {
-    stats[team] = {team, W:0, D:0, L:0, pts:0, GF:0, GA:0, GD:0};
+    stats[team] = { team, W: 0, D: 0, L: 0, pts: 0, GF: 0, GA: 0, GD: 0 };
   }
   stats[team].GF += scored;
   stats[team].GA += conceded;
@@ -16,7 +20,6 @@ function updateTeam(stats, team, scored, conceded, result) {
 // Render standings table
 function renderStandings(stats) {
   const teams = Object.values(stats);
-  // Sort by pts desc, then GD, then GF
   teams.sort((a, b) =>
     b.pts - a.pts || b.GD - a.GD || b.GF - a.GF
   );
@@ -51,15 +54,10 @@ function renderFixtures(fixtures) {
     </tr>`;
   });
   html += `</table>`;
- document.getElementById('fixtures').innerHTML = html;
+  document.getElementById('fixtures').innerHTML = html;
 }
-document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
-document.getElementById('standings').innerHTML = "Loading league table...";
 
-fetch(SHEET_API)
-  .then(res => res.json())
-  ...
-// Fetch and process data
+// ✅ Fetch and process data
 fetch(SHEET_API)
   .then(res => res.json())
   .then(data => {
@@ -71,11 +69,9 @@ fetch(SHEET_API)
     matches.forEach(m => {
       const hs = parseInt(m.home_score);
       const as = parseInt(m.away_score);
-      if (isNaN(hs) || isNaN(as)) return; // skip invalid
+      if (isNaN(hs) || isNaN(as)) return;
 
-      // Home team result
       let homeRes = hs > as ? 'W' : hs === as ? 'D' : 'L';
-      // Away team result
       let awayRes = as > hs ? 'W' : as === hs ? 'D' : 'L';
 
       updateTeam(stats, m.home_team, hs, as, homeRes);
