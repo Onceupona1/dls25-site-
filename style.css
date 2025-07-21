@@ -81,3 +81,11 @@ th, td {
 th {
   background: #e3eaf2;
 }
+/* Make tables scrollable on small screens */
+@media (max-width: 600px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
