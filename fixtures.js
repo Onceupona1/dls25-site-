@@ -1,13 +1,9 @@
-const SHEET_API = "https://sheetdb.io/api/v1/ev3zbcl5xanwt"; // Your SheetDB API
-
-// Show loading messages BEFORE fetching
-document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
-document.getElementById('standings').innerHTML = "Loading league table...";
+const SHEET_API = "https://sheetdb.io/api/v1/rhgvdm9riye3p";
 
 // Helper: Update standings for a team
 function updateTeam(stats, team, scored, conceded, result) {
   if (!stats[team]) {
-    stats[team] = { team, W: 0, D: 0, L: 0, pts: 0, GF: 0, GA: 0, GD: 0 };
+    stats[team] = {team, W:0, D:0, L:0, pts:0, GF:0, GA:0, GD:0};
   }
   stats[team].GF += scored;
   stats[team].GA += conceded;
@@ -23,11 +19,15 @@ function renderStandings(stats) {
   teams.sort((a, b) =>
     b.pts - a.pts || b.GD - a.GD || b.GF - a.GF
   );
+
+  const myTeam = localStorage.getItem('myTeam');
   let html = `<h3>League Table</h3><table>
     <tr><th>Team</th><th>W</th><th>D</th><th>L</th>
     <th>Pts</th><th>GF</th><th>GA</th><th>GD</th></tr>`;
+
   teams.forEach(t => {
-    html += `<tr>
+    const highlight = (t.team === myTeam) ? ' style="background: #ffff99;"' : '';
+    html += `<tr${highlight}>
       <td>${t.team}</td>
       <td>${t.W}</td>
       <td>${t.D}</td>
@@ -57,14 +57,16 @@ function renderFixtures(fixtures) {
   document.getElementById('fixtures').innerHTML = html;
 }
 
-// ✅ Fetch and process data
+document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
+document.getElementById('standings').innerHTML = "Loading league table...";
+
+// Fetch and process match data
 fetch(SHEET_API)
   .then(res => res.json())
   .then(data => {
     const matches = data.data || data.sheet || [];
     renderFixtures(matches);
 
-    // Calculate standings
     let stats = {};
     matches.forEach(m => {
       const hs = parseInt(m.home_score);
