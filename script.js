@@ -1,5 +1,5 @@
 // Replace with your SheetDB endpoint or similar (see below for setup)
-const SHEETDB_API = "https://sheetdb.io/api/v1/YOUR_SHEETDB_ID";
+const SHEETDB_API = "https://sheetdb.io/api/v1/rhgvdm9riye3p";
 // For demo: go to https://sheetdb.io and connect a Google Sheet
 
 const paystackKey = "pk_live_0b6dbae0544edafc7537a0e152426e9f6e804f5b"; // public key
