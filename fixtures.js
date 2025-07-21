@@ -51,7 +51,9 @@ function renderFixtures(fixtures) {
     </tr>`;
   });
   html += `</table>`;
-  document.getElementById('fixtures').innerHTML = html;
+ document.getElementById('fixtures').innerHTML = html;
+  document.getElementById('fixtures').innerHTML = "Loading fixtures and results...";
+document.getElementById('standings').innerHTML = "Loading league table...";
 }
 
 // Fetch and process data
