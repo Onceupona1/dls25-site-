@@ -1,4 +1,4 @@
-const SHEET_API = "https://sheetdb.io/api/v1/xxxxxx"; // Your SheetDB API
+const SHEET_API = "https://sheetdb.io/api/v1/ev3zbcl5xanwt"; // Your SheetDB API
 
 // Helper: Update standings for a team
 function updateTeam(stats, team, scored, conceded, result) {
