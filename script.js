@@ -12,7 +12,8 @@ regForm.addEventListener('submit', function(e) {
   const data = {
     name: formData.get('name'),
     phone: formData.get('phone'),
-    team: formData.get('team')
+    team: formData.get('team'),
+    logo_url: formData.get('logo_url') || ""
   };
 
   // Start Paystack payment
@@ -35,6 +36,7 @@ regForm.addEventListener('submit', function(e) {
         // Save data to localStorage for confirmation & highlighting
         localStorage.setItem("registeredTeam", JSON.stringify(data));
         localStorage.setItem("myTeam", data.team); // ✅ save team for highlighting
+        if (data.logo_url) localStorage.setItem("myLogo", data.logo_url);
         window.location.href = "success.html";
       })
       .catch(() => {
