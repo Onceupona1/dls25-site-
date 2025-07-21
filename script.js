@@ -23,7 +23,7 @@ regForm.addEventListener('submit', function(e) {
     key: paystackKey,
     email: `${data.phone}@demo.com`, // for demo, fake email
     amount: 2000 * 100, // amount in kobo (₦2000)
-    currency: "NGN",
+    currency: "GHS",
     ref: "REG-" + Date.now(),
     callback: function(response) {
       // Payment successful, save to SheetDB
