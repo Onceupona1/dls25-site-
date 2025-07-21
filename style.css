@@ -67,3 +67,17 @@ button:hover, .btn:hover {
     padding: 1rem;
   }
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+th, td {
+  border: 1px solid #b0bec5;
+  padding: 0.5rem;
+  text-align: center;
+}
+th {
+  background: #e3eaf2;
+}
